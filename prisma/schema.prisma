@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String @id @default(cuid())
+  email String @unique
+  name  String?
+  role  Role   @default(USER)
+  bots  Bot[]
+}
+
+model Bot {
+  id              String @id @default(cuid())
+  name            String
+  description     String
+  welcomeMessage  String @default("مرحبًا! كيف يمكنني مساعدتك؟")
+  userId          String
+  user            User   @relation(fields: [userId], references: [id])
+  usageStats      BotUsageStats[]
+}
+
+model BotUsageStats {
+  id        String   @id @default(cuid())
+  botId     String
+  bot       Bot      @relation(fields: [botId], references: [id])
+  date      DateTime @default(now())
+  messages  Int      @default(0)
+  uniqueUsers Int    @default(0)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
